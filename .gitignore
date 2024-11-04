@@ -1,3 +1,5 @@
 ebnerd_small/
+ebnerd_large/
 *.zip
+*.parquet
 env/
