@@ -3,3 +3,4 @@ ebnerd_large/
 *.zip
 *.parquet
 env/
+glove.6B*
