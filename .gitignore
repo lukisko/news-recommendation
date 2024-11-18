@@ -4,3 +4,4 @@ ebnerd_large/
 *.parquet
 env/
 glove.6B*
+*.desktop
