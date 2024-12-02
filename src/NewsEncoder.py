@@ -7,7 +7,7 @@ from XLMRobertaWordEmbedder import XLMRobertaWordEmbedder
 
 
 class NewsEncoder(nn.Module):
-    def __init__(self, hidden_size=768, num_heads=12, attention_dim=128, dropout=0.1):
+    def __init__(self, hidden_size=768, num_heads=16, attention_dim=128, dropout=0.1):
         """
         Initializes the News Encoder Model with word embeddings, multi-head self-attention, and additive word attention.
 
@@ -18,6 +18,8 @@ class NewsEncoder(nn.Module):
             dropout (float): Dropout probability.
         """
         super(NewsEncoder, self).__init__()
+        assert hidden_size % num_heads == 0, "Embeding must be divisible by heads"
+
 
         self.hidden_size = hidden_size
 
@@ -63,7 +65,6 @@ class NewsEncoder(nn.Module):
 
         # Obtain word embeddings and attention masks from the first layer
         token_embeddings, attention_mask = self.word_embedder(titles_list)  # (batch_size, seq_length, hidden_size), (batch_size, seq_length)
-
         output = token_embeddings.reshape(input_shape + (30, self.hidden_size))
 
         # Prepare the attention mask for the self-attention layer
@@ -74,10 +75,12 @@ class NewsEncoder(nn.Module):
 
         # Apply the multi-head self-attention layer
 
-        # For PytorchMultiHeadSelfAttHead
-        # enhanced_embeddings, self_attn_weights = self.self_attention(output, attention_mask=key_padding_mask)
+        print(output.shape)
 
-        self_attn_weights = torch.ones(3, 30, 30)
+        # For PytorchMultiHeadSelfAttHead
+        enhanced_embeddings, self_attn_weights = self.self_attention(output, attention_mask=key_padding_mask)
+
+        self_attn_weights = torch.ones(6, 30, 30)
 
         # For ManualMultiHeadSelfAttHead
         enhanced_embeddings = self.self_attention(output)
@@ -86,6 +89,7 @@ class NewsEncoder(nn.Module):
         # Prepare mask where True indicates valid tokens for additive attention
         additive_mask = attention_mask.bool()  # Shape: (batch_size, seq_length)
 
+        print(enhanced_embeddings.shape)
         final_representations, additive_attn_weights = self.additive_attention(enhanced_embeddings, mask=additive_mask)
         # final_representations: (batch_size, hidden_size)
         # additive_attn_weights: (batch_size, seq_length)
